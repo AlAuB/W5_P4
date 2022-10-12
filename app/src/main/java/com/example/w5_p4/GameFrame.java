@@ -13,7 +13,13 @@ import android.widget.Toast;
 
 import com.google.android.material.button.MaterialButton;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -36,11 +42,13 @@ public class GameFrame extends Fragment implements View.OnClickListener {
     MaterialButton lastClicked;
     StringBuilder preserve;
     Button clear, submit;
+    BufferedReader reader;
     MaterialButton one, two, three, four;
     MaterialButton five, six, seven, eight;
     MaterialButton nine, ten, eleven, twelve;
     MaterialButton thirteen, fourteen, fifteen, sixteen;
     ArrayList<MaterialButton> allButtons = new ArrayList<>();
+    HashSet<String> dictionary = new HashSet<>();
     private final String[] BOGGLE_Board = {
             "LRYTTE", "VTHRWE", "EGHWNE", "SEOTIS",
             "ANAEEG", "IDSYTT", "OATTOW", "MTOICU",
@@ -92,6 +100,8 @@ public class GameFrame extends Fragment implements View.OnClickListener {
         setRandomLetter();
         lastClicked = null;
         clear.setOnClickListener(view -> clear());
+        submit.setOnClickListener(view -> submit());
+        loadDictionary();
         return view;
     }
 
@@ -173,5 +183,37 @@ public class GameFrame extends Fragment implements View.OnClickListener {
         for (int i = 0; i < allButtons.size(); i++) {
             allButtons.get(i).setEnabled(true);
         }
+    }
+
+    private void loadDictionary() {
+        try {
+            reader = new BufferedReader(new InputStreamReader(
+                    requireContext().getAssets().open(
+                            "dictionary.txt"), StandardCharsets.UTF_8));
+            String word;
+            while ((word = reader.readLine()) != null) {
+                dictionary.add(word.toLowerCase());
+            }
+        } catch (IOException e) {
+            System.out.println("Cannot open dictionary.txt");
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception e) {
+                    System.out.println("Cannot close reader");
+                }
+            }
+        }
+    }
+
+    private void submit() {
+        String word = input.getText().toString().toLowerCase();
+        if (dictionary.contains(word)) {
+            System.out.println("Correct");
+        } else {
+            System.out.println("Wrong");
+        }
+        clear();
     }
 }
