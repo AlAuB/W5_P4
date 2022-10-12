@@ -8,6 +8,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.button.MaterialButton;
 
@@ -30,6 +32,9 @@ public class GameFrame extends Fragment implements View.OnClickListener {
     private String mParam2;
 
     View view;
+    TextView input;
+    MaterialButton lastClicked;
+    StringBuilder preserve;
     Button clear, submit;
     MaterialButton one, two, three, four;
     MaterialButton five, six, seven, eight;
@@ -81,8 +86,12 @@ public class GameFrame extends Fragment implements View.OnClickListener {
         view = inflater.inflate(R.layout.fragment_game_frame, container, false);
         clear = view.findViewById(R.id.clear);
         submit = view.findViewById(R.id.submit);
+        input = view.findViewById(R.id.input);
+        preserve = new StringBuilder();
         initiateMaterialButtons();
         setRandomLetter();
+        lastClicked = null;
+        clear.setOnClickListener(view -> clear());
         return view;
     }
 
@@ -125,10 +134,44 @@ public class GameFrame extends Fragment implements View.OnClickListener {
         return String.valueOf(temp.charAt(num));
     }
 
+    private boolean locationCheck(MaterialButton current) {
+        int currentIndex = allButtons.indexOf(current);
+        int lastIndex = allButtons.indexOf(lastClicked);
+        int lastX = lastIndex % 4;
+        int lastY = lastIndex / 4;
+        int currentX = currentIndex % 4;
+        int currentY = currentIndex / 4;
+        return currentIndex != lastIndex && Math.abs(lastX - currentX) <= 1
+                && Math.abs(lastY - currentY) <= 1;
+    }
+
     @Override
     public void onClick(View view) {
         MaterialButton button = (MaterialButton) view;
-        String buttonText = button.getText().toString();
-        System.out.println("Letter: " + buttonText);
+        if (lastClicked == null) {
+            operations(button);
+        } else {
+            if (locationCheck(button)) {
+                operations(button);
+            } else {
+                Toast.makeText(this.getContext(), "You may only select connected letters",
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void operations(MaterialButton button) {
+        lastClicked = button;
+        button.setEnabled(false);
+        preserve.append(button.getText().toString());
+        input.setText(preserve.toString());
+    }
+
+    private void clear() {
+        preserve.setLength(0);
+        input.setText(getResources().getString(R.string.word_shows_here));
+        for (int i = 0; i < allButtons.size(); i++) {
+            allButtons.get(i).setEnabled(true);
+        }
     }
 }
