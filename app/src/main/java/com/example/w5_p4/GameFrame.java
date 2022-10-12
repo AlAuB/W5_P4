@@ -11,6 +11,8 @@ import android.widget.Button;
 
 import com.google.android.material.button.MaterialButton;
 
+import java.util.ArrayList;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link GameFrame#newInstance} factory method to
@@ -33,6 +35,13 @@ public class GameFrame extends Fragment implements View.OnClickListener {
     MaterialButton five, six, seven, eight;
     MaterialButton nine, ten, eleven, twelve;
     MaterialButton thirteen, fourteen, fifteen, sixteen;
+    ArrayList<MaterialButton> allButtons = new ArrayList<>();
+    private final String[] BOGGLE_Board = {
+            "LRYTTE", "VTHRWE", "EGHWNE", "SEOTIS",
+            "ANAEEG", "IDSYTT", "OATTOW", "MTOICU",
+            "AFPKFS", "XLDERI", "HCPOAS", "ENSIEU",
+            "YLDEVR", "ZNRNHL", "NMIQHU", "OBBAOJ"
+    };
 
     public GameFrame() {
         // Required empty public constructor
@@ -97,34 +106,23 @@ public class GameFrame extends Fragment implements View.OnClickListener {
     }
 
     private void setRandomLetter() {
-        one.setText(getRandomLetter());
-        two.setText(getRandomLetter());
-        three.setText(getRandomLetter());
-        four.setText(getRandomLetter());
-        five.setText(getRandomLetter());
-        six.setText(getRandomLetter());
-        seven.setText(getRandomLetter());
-        eight.setText(getRandomLetter());
-        nine.setText(getRandomLetter());
-        ten.setText(getRandomLetter());
-        eleven.setText(getRandomLetter());
-        twelve.setText(getRandomLetter());
-        thirteen.setText(getRandomLetter());
-        fourteen.setText(getRandomLetter());
-        fifteen.setText(getRandomLetter());
-        sixteen.setText(getRandomLetter());
+        for (int i = 0; i < allButtons.size(); i++) {
+            MaterialButton button = allButtons.get(i);
+            button.setText(getRandomLetter(i));
+        }
     }
 
     private MaterialButton setMaterialButton(int id) {
         MaterialButton button = view.findViewById(id);
         button.setOnClickListener(this);
+        allButtons.add(button);
         return button;
     }
 
-    private String getRandomLetter() {
-        int randNum = (int) ((Math.random() * (90 - 65)) + 65);
-        char letter = (char) randNum;
-        return String.valueOf(letter);
+    private String getRandomLetter(int index) {
+        int num = (int) ((Math.random() * 5));
+        String temp = BOGGLE_Board[index];
+        return String.valueOf(temp.charAt(num));
     }
 
     @Override
