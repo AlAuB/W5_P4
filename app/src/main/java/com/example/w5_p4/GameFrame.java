@@ -265,7 +265,7 @@ public class GameFrame extends Fragment implements View.OnClickListener {
 
     private void submit() {
         String word = input.getText().toString().toLowerCase();
-        if (wordCheck(word) && word.length() > 0) {
+        if (wordCheck(word) && !word.equals("input shows here")) {
             if (!answered.contains(word)) {
                 if (dictionary.contains(word)) {
                     answered.add(word);
