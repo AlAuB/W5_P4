@@ -4,7 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements GameFrame.gameListener, ControlFrame.controlListener {
 
     GameFrame gameFrame;
     ControlFrame controlFrame;
@@ -26,5 +26,15 @@ public class MainActivity extends AppCompatActivity {
                 replace(R.id.lowerPart, controlFrame, "control").
                 setReorderingAllowed(true).
                 commit();
+    }
+
+    @Override
+    public void createNewGame() {
+        gameFrame.newGame();
+    }
+
+    @Override
+    public void updateScore(int score) {
+        controlFrame.setScore(score);
     }
 }

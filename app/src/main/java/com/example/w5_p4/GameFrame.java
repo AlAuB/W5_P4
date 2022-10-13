@@ -1,7 +1,9 @@
 package com.example.w5_p4;
 
+import android.content.Context;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -28,17 +30,17 @@ import java.util.Objects;
  */
 public class GameFrame extends Fragment implements View.OnClickListener {
 
-    // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
+    int score;
     View view;
     TextView input;
+    gameListener listener;
     MaterialButton lastClicked;
     StringBuilder preserve;
     Button clear, submit;
@@ -48,6 +50,7 @@ public class GameFrame extends Fragment implements View.OnClickListener {
     MaterialButton nine, ten, eleven, twelve;
     MaterialButton thirteen, fourteen, fifteen, sixteen;
     ArrayList<MaterialButton> allButtons = new ArrayList<>();
+    HashSet<String> answered = new HashSet<>();
     HashSet<String> dictionary = new HashSet<>();
     private final String[] BOGGLE_Board = {
             "LRYTTE", "VTHRWE", "EGHWNE", "SEOTIS",
@@ -99,6 +102,7 @@ public class GameFrame extends Fragment implements View.OnClickListener {
         initiateMaterialButtons();
         setRandomLetter();
         lastClicked = null;
+        score = 0;
         clear.setOnClickListener(view -> clear());
         submit.setOnClickListener(view -> submit());
         loadDictionary();
@@ -122,6 +126,10 @@ public class GameFrame extends Fragment implements View.OnClickListener {
         fourteen = setMaterialButton(R.id.fourteen);
         fifteen = setMaterialButton(R.id.fifteen);
         sixteen = setMaterialButton(R.id.sixteen);
+    }
+
+    public interface gameListener {
+        void updateScore(int score);
     }
 
     private void setRandomLetter() {
@@ -183,6 +191,7 @@ public class GameFrame extends Fragment implements View.OnClickListener {
         for (int i = 0; i < allButtons.size(); i++) {
             allButtons.get(i).setEnabled(true);
         }
+        lastClicked = null;
     }
 
     private void loadDictionary() {
@@ -207,13 +216,90 @@ public class GameFrame extends Fragment implements View.OnClickListener {
         }
     }
 
+    private boolean wordCheck(String word) {
+        // Length check
+        if (word.length() < 4) {
+            Toast.makeText(this.getContext(), "Word must has 4 letters.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        // Two vowels check
+        int vowelCount = 0;
+        if (word.contains("a"))
+            vowelCount++;
+        if (word.contains("e"))
+            vowelCount++;
+        if (word.contains("i"))
+            vowelCount++;
+        if (word.contains("o"))
+            vowelCount++;
+        if (word.contains("u"))
+            vowelCount++;
+        if (vowelCount >= 2)
+            return true;
+        else {
+            Toast.makeText(this.getContext(), "Word must has 2 vowels.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+    }
+
+    private int checkPoints(String word) {
+        int tempScore = 0;
+        char tempChar;
+        boolean doublePoints = false;
+        for (int i = 0; i < word.length(); i++) {
+            tempChar = word.charAt(i);
+            if (tempChar == 'a' || tempChar == 'e' || tempChar == 'i' || tempChar == 'o' || tempChar == 'u') {
+                tempScore += 5;
+            } else {
+                tempScore += 1;
+                if (tempChar == 's' || tempChar == 'z' || tempChar == 'p' || tempChar == 'x' || tempChar == 'q') {
+                    doublePoints = true;
+                }
+            }
+        }
+        if (doublePoints)
+            tempScore *= 2;
+        Toast.makeText(this.getContext(), "That's correct, +" + tempScore + " points.", Toast.LENGTH_SHORT).show();
+        return tempScore;
+    }
+
     private void submit() {
         String word = input.getText().toString().toLowerCase();
-        if (dictionary.contains(word)) {
-            System.out.println("Correct");
-        } else {
-            System.out.println("Wrong");
+        if (wordCheck(word)) {
+            if (!answered.contains(word)) {
+                if (dictionary.contains(word)) {
+                    answered.add(word);
+                    score += checkPoints(word);
+                } else {
+                    Toast.makeText(this.getContext(), "That's incorrect, -10 points.", Toast.LENGTH_SHORT).show();
+                    score -= 10;
+                }
+                listener.updateScore(score);
+            } else {
+                Toast.makeText(this.getContext(), "Repeated Word.", Toast.LENGTH_SHORT).show();
+            }
         }
         clear();
+    }
+
+    public void newGame() {
+        setRandomLetter();
+        clear();
+        score = 0;
+        listener.updateScore(score);
+        answered.clear();
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (context instanceof gameListener)
+            listener = (gameListener) context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        listener = null;
     }
 }

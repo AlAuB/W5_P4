@@ -1,12 +1,16 @@
 package com.example.w5_p4;
 
+import android.content.Context;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -23,6 +27,11 @@ public class ControlFrame extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    View view;
+    TextView scoreTextView;
+    Button newGame;
+    private controlListener listener;
 
     public ControlFrame() {
         // Required empty public constructor
@@ -59,6 +68,31 @@ public class ControlFrame extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_control_frame, container, false);
+        view = inflater.inflate(R.layout.fragment_control_frame, container, false);
+        scoreTextView = view.findViewById(R.id.scoreNum);
+        newGame = view.findViewById(R.id.newGame);
+        newGame.setOnClickListener(view -> listener.createNewGame());
+        return view;
+    }
+
+    public void setScore(int score) {
+        scoreTextView.setText(String.valueOf(score));
+    }
+
+    public interface controlListener {
+        void createNewGame();
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (context instanceof controlListener)
+            listener = (controlListener) context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        listener = null;
     }
 }
